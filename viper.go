@@ -163,6 +163,8 @@ type Viper struct {
 	configPermissions os.FileMode
 	envPrefix         string
 
+	PanicOnNil bool
+
 	automaticEnvApplied bool
 	envKeyReplacer      StringReplacer
 	allowEmptyEnv       bool
@@ -179,7 +181,8 @@ type Viper struct {
 
 	onConfigChange func(fsnotify.Event)
 
-	logger *slog.Logger
+	logger          *slog.Logger
+	onDefaultLogger *slog.Logger
 
 	encoderRegistry EncoderRegistry
 	decoderRegistry DecoderRegistry
@@ -717,6 +720,9 @@ func (v *Viper) Get(key string) any {
 	lcaseKey := strings.ToLower(key)
 	val := v.find(lcaseKey, true)
 	if val == nil {
+		if v.PanicOnNil {
+			panic(fmt.Sprintf("%s is not configured", key))
+		}
 		return nil
 	}
 
@@ -726,6 +732,11 @@ func (v *Viper) Get(key string) any {
 		path := strings.Split(lcaseKey, v.keyDelim)
 		defVal := v.searchMap(v.defaults, path)
 		if defVal != nil {
+			if v.onDefaultLogger != nil {
+				v.onDefaultLogger.Warn(
+					fmt.Sprintf("Setting default value %v for key %s", defVal, lcaseKey),
+				)
+			}
 			valType = defVal
 		}
 
@@ -1268,6 +1279,9 @@ func (v *Viper) find(lcaseKey string, flagDefault bool) any {
 	// Default next
 	val = v.searchMap(v.defaults, path)
 	if val != nil {
+		v.onDefaultLogger.Warn(
+			fmt.Sprintf("Setting default value %v for key %s", val, lcaseKey),
+		)
 		return val
 	}
 	if nested && v.isPathShadowedInDeepMap(path, v.defaults) != "" {
