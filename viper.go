@@ -210,6 +210,8 @@ func New() *Viper {
 	v.aliases = make(map[string]string)
 	v.typeByDefValue = false
 	v.logger = slog.New(&discardHandler{})
+	v.onDefaultLogger = nil
+	v.PanicOnNil = false
 
 	codecRegistry := NewCodecRegistry()
 
@@ -1279,9 +1281,11 @@ func (v *Viper) find(lcaseKey string, flagDefault bool) any {
 	// Default next
 	val = v.searchMap(v.defaults, path)
 	if val != nil {
-		v.onDefaultLogger.Warn(
-			fmt.Sprintf("Setting default value %v for key %s", val, lcaseKey),
-		)
+		if v.onDefaultLogger != nil {
+			v.onDefaultLogger.Warn(
+				fmt.Sprintf("Setting default value %v for key %s", val, lcaseKey),
+			)
+		}
 		return val
 	}
 	if nested && v.isPathShadowedInDeepMap(path, v.defaults) != "" {
