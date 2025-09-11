@@ -2,8 +2,7 @@ module github.com/dnonakolesax/viper
 
 go 1.23.8
 
-replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.0
-
+replace github.com/spf13/viper => ../
 require (
 	github.com/sagikazarmark/crypt v0.31.0
 	github.com/spf13/viper v1.21.0

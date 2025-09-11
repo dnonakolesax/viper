@@ -1,4 +1,10 @@
-module github.com/spf13/viper
+module github.com/dnonakolesax/viper
+
+require (
+	github.com/spf13/viper v1.21.0
+)
+
+replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.0
 
 go 1.23.0
 
