@@ -1,10 +1,8 @@
 module github.com/dnonakolesax/viper
 
-require (
-	github.com/spf13/viper v1.21.0
-)
-
 replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.1
+
+require github.com/spf13/viper v1.21.0
 
 go 1.23.0
 
@@ -23,7 +21,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	golang.org/x/sys v0.29.0 // indirect

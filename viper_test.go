@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/spf13/viper/internal/testutil"
+	"github.com/dnonakolesax/viper/internal/testutil"
 )
 
 // var yamlExample = []byte(`Hacker: true
