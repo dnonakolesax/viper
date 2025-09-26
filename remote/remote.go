@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	crypt "github.com/sagikazarmark/crypt/config"
+	crypt "github.com/dnonakolesax/crypt/config"
 
 	"github.com/spf13/viper"
 )
@@ -106,6 +106,11 @@ func getConfigManager(rp viper.RemoteProvider) (crypt.ConfigManager, error) {
 			cm, err = crypt.NewStandardFirestoreConfigManager(endpoints)
 		case "nats":
 			cm, err = crypt.NewStandardNatsConfigManager(endpoints)
+		case "vault":
+			creds := rp.Credentials()
+			if creds.AuthType == "userpass" {
+				cm, err = crypt.NewStandardVaultConfigManager(endpoints[0], creds.Login, creds.Password)
+			}	
 		default:
 			cm, err = crypt.NewStandardConsulConfigManager(endpoints)
 		}

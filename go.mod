@@ -1,6 +1,6 @@
 module github.com/dnonakolesax/viper
 
-replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.1
+replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.3
 
 require github.com/spf13/viper v1.21.0
 
