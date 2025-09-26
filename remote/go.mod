@@ -2,11 +2,11 @@ module github.com/dnonakolesax/viper/remote
 
 go 1.23.8
 
-replace github.com/spf13/viper => ../
+replace github.com/dnonakolesax/viper => ../
 
 require (
 	github.com/dnonakolesax/crypt v0.32.3
-	github.com/dnonakolesax/viper v1.21.4
+	github.com/dnonakolesax/viper v1.24.1
 )
 
 require (

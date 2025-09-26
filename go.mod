@@ -1,12 +1,9 @@
 module github.com/dnonakolesax/viper
 
-replace github.com/spf13/viper => github.com/dnonakolesax/viper v1.21.4
-
-require github.com/spf13/viper v1.21.0
-
 go 1.23.8
 
 require (
+	github.com/dnonakolesax/viper/remote v0.0.0-20250926212606-81f1ab2182b9
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/pelletier/go-toml/v2 v2.2.4
@@ -31,7 +28,6 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dnonakolesax/crypt v0.32.3 // indirect
-	github.com/dnonakolesax/viper/remote v0.0.0-20250926210733-38c4df1b83d8 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect

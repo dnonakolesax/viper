@@ -31,7 +31,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/dnonakolesax/viper/internal/testutil"
-	_ "github.com/dnonakolesax/viper/remote"
 )
 
 // var yamlExample = []byte(`Hacker: true
