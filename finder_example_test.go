@@ -6,7 +6,7 @@ import (
 	"github.com/sagikazarmark/locafero"
 	"github.com/spf13/afero"
 
-	"github.com/spf13/viper"
+	"github.com/dnonakolesax/viper"
 )
 
 func ExampleFinder() {

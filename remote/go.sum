@@ -38,8 +38,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dnonakolesax/crypt v0.32.3 h1:F1LI25VIk0nSAOwkJgccNt1Rlh51YXE8X8x5gp75O38=
 github.com/dnonakolesax/crypt v0.32.3/go.mod h1:Ssra623CajvPOkOwFDzD6h3vZJQUb9cncUmL6jfOfg4=
-github.com/dnonakolesax/viper v1.21.2 h1:JzJk93jzq89WYn4bTkE01zyOJpe2pho+BXAJVMzoeFE=
-github.com/dnonakolesax/viper v1.21.2/go.mod h1:8KCwTgLNzwQzj36Tl1dDhK8dnlneN5BNb8n6HLxG/tE=
+github.com/dnonakolesax/viper v1.21.3 h1:f/QZFcHyk4y1uEJXT1xkGSdD49/0qgC/NwlxXSXzZHU=
+github.com/dnonakolesax/viper v1.21.3/go.mod h1:STmlBW7TcBPHLKzXaewbXke8N3UH0pXLWzfiyrhiesQ=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.9.0/go.mod h1:eQcE1qtQxscV5RaZvpXrrb8Drkc3/DdQ+uUYCNjL+zU=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
