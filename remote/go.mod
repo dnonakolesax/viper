@@ -4,10 +4,7 @@ go 1.23.8
 
 replace github.com/dnonakolesax/viper => ../
 
-require (
-	github.com/dnonakolesax/crypt v0.32.3
-	github.com/dnonakolesax/viper v1.24.1
-)
+require github.com/dnonakolesax/crypt v0.32.3
 
 require (
 	cloud.google.com/go v0.120.0 // indirect
@@ -19,6 +16,7 @@ require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
+	github.com/dnonakolesax/viper v1.21.5 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
