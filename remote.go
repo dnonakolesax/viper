@@ -9,10 +9,10 @@ import (
 )
 
 // SupportedRemoteProviders are universally supported remote providers.
-var SupportedRemoteProviders = []string{"etcd", "etcd3", "consul", "firestore", "nats", "vault"}
+var SupportedRemoteProviders = []string{"etcd", "etcd3", "consul", "firestore", "nats"}
 
 func resetRemote() {
-	SupportedRemoteProviders = []string{"etcd", "etcd3", "consul", "firestore", "nats", "vault"}
+	SupportedRemoteProviders = []string{"etcd", "etcd3", "consul", "firestore", "nats"}
 }
 
 type remoteConfigFactory interface {
@@ -52,7 +52,6 @@ type defaultRemoteProvider struct {
 	endpoint      string
 	path          string
 	secretKeyring string
-	creds         *RemoteCredentials
 }
 
 func (rp defaultRemoteProvider) Provider() string {
@@ -71,10 +70,6 @@ func (rp defaultRemoteProvider) SecretKeyring() string {
 	return rp.secretKeyring
 }
 
-func (rp defaultRemoteProvider) Credentials() *RemoteCredentials {
-	return rp.creds
-}
-
 // RemoteProvider stores the configuration necessary
 // to connect to a remote key/value store.
 // Optional secretKeyring to unencrypt encrypted values
@@ -84,13 +79,6 @@ type RemoteProvider interface {
 	Endpoint() string
 	Path() string
 	SecretKeyring() string
-	Credentials() *RemoteCredentials
-}
-
-type RemoteCredentials struct {
-	AuthType string
-	Login string 
-	Password string
 }
 
 // AddRemoteProvider adds a remote configuration source.
@@ -101,11 +89,11 @@ type RemoteCredentials struct {
 // To retrieve a config file called myapp.json from /configs/myapp.json
 // you should set path to /configs and set config name (SetConfigName()) to
 // "myapp".
-func AddRemoteProvider(provider, endpoint, path string, rc *RemoteCredentials) error {
-	return v.AddRemoteProvider(provider, endpoint, path, rc)
+func AddRemoteProvider(provider, endpoint, path string) error {
+	return v.AddRemoteProvider(provider, endpoint, path)
 }
 
-func (v *Viper) AddRemoteProvider(provider, endpoint, path string, rc *RemoteCredentials) error {
+func (v *Viper) AddRemoteProvider(provider, endpoint, path string) error {
 	if !slices.Contains(SupportedRemoteProviders, provider) {
 		return UnsupportedRemoteProviderError(provider)
 	}
@@ -116,7 +104,6 @@ func (v *Viper) AddRemoteProvider(provider, endpoint, path string, rc *RemoteCre
 			endpoint: endpoint,
 			provider: provider,
 			path:     path,
-			creds:    rc,
 		}
 		if !v.providerPathExists(rp) {
 			v.remoteProviders = append(v.remoteProviders, rp)

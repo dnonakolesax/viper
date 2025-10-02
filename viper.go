@@ -174,6 +174,7 @@ type Viper struct {
 	override       map[string]any
 	defaults       map[string]any
 	kvstore        map[string]any
+	secretstore    map[string]any
 	pflags         map[string]FlagValue
 	env            map[string][]string
 	aliases        map[string]string
@@ -208,6 +209,7 @@ func New() *Viper {
 	v.pflags = make(map[string]FlagValue)
 	v.env = make(map[string][]string)
 	v.aliases = make(map[string]string)
+	v.secretstore = make(map[string]any)
 	v.typeByDefValue = false
 	v.logger = slog.New(&discardHandler{})
 	v.onDefaultLogger = nil
@@ -1233,6 +1235,15 @@ func (v *Viper) find(lcaseKey string, flagDefault bool) any {
 		}
 	}
 	if nested && v.isPathShadowedInFlatMap(path, v.pflags) != "" {
+		return nil
+	}
+
+	// Vault next
+	val = v.searchMap(v.secretstore, path)
+	if val != nil {
+		return val
+	}
+	if nested && v.isPathShadowedInDeepMap(path, v.config) != "" {
 		return nil
 	}
 

@@ -19,7 +19,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"fmt"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/go-viper/mapstructure/v2"
@@ -2684,22 +2683,4 @@ func skipWindows(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Skip test on Windows")
 	}
-}
-
-func TestVault(t *testing.T) {
-	v = New()
-	creds := &RemoteCredentials{
-		AuthType: "userpass",
-		Login: "dunkelheit",
-		Password: "dunkelheit",
-	}
-	err := v.AddRemoteProvider("vault", "127.0.0.1:8200", "sample/zizipabeda:sample", creds)
-	if err != nil {
-		t.Errorf("vault error: %s", err.Error())
-	}
-	err = v.ReadRemoteConfig()
-	if err != nil {
-		t.Errorf("vault merge error: %s", err.Error())
-	}
-	fmt.Println(v.Get("sample/zizipabeda:sample"))
 }
