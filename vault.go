@@ -12,21 +12,25 @@ import (
 	"github.com/hashicorp/vault-client-go"
 )
 
+// Pair of key and value
 type KVEntry struct {
-	Key string
+	Key   string
 	Value string
 }
 
+// Configuration for watching for vault's secrets.
+// Version period - how often to check for changes in secrets (0 if never)
+// AlertChannel - channel to send changes to
 type VaultWatchConfig struct {
 	VersionPeriod time.Duration
-	AlertChannel chan<-KVEntry
+	AlertChannel  chan<- KVEntry
 }
 
-type VaultClient struct {
-	client           *vault.Client
-	vaults           map[string]string
-	leases           map[string]int
-	versions         map[string]int
+type vaultClient struct {
+	client      *vault.Client
+	vaults      map[string]string
+	leases      map[string]int
+	versions    map[string]int
 	watchConfig *VaultWatchConfig
 }
 
@@ -38,7 +42,7 @@ func isLeasable(vtype string) bool {
 	return vtype == "database"
 }
 
-func (c *VaultClient) ConfigureVault() error {
+func (c *vaultClient) ConfigureVault() error {
 	vaults, err := c.client.System.InternalUiListEnabledVisibleMounts(context.Background())
 
 	if err != nil {
@@ -55,7 +59,7 @@ func (c *VaultClient) ConfigureVault() error {
 	return nil
 }
 
-func (c *VaultClient) getKV2(mountPath string, key string, secretName string) ([]byte, int, error) {
+func (c *vaultClient) getKV2(mountPath string, key string, secretName string) ([]byte, int, error) {
 	data, err := c.client.Secrets.KvV2Read(context.Background(), key, vault.WithMountPath(mountPath))
 	if err != nil {
 		return nil, 0, err
@@ -72,7 +76,7 @@ func (c *VaultClient) getKV2(mountPath string, key string, secretName string) ([
 	return []byte(secret), int(version), nil
 }
 
-func (c *VaultClient) getDBCreds(mountPath string, role string) ([]byte, int, error) {
+func (c *vaultClient) getDBCreds(mountPath string, role string) ([]byte, int, error) {
 	data, err := c.client.Secrets.DatabaseGenerateCredentials(context.Background(), role, vault.WithMountPath(mountPath))
 	if err != nil {
 		return nil, 0, err
@@ -83,7 +87,7 @@ func (c *VaultClient) getDBCreds(mountPath string, role string) ([]byte, int, er
 	return []byte(username + ":" + password), lifetime, nil
 }
 
-func (c *VaultClient) getVaultTypePath(key string) (string, string, error) {
+func (c *vaultClient) getVaultTypePath(key string) (string, string, error) {
 	var vaultType, mountPath string
 	for vault, vtype := range c.vaults {
 		if strings.HasPrefix(key, vault) {
@@ -95,7 +99,7 @@ func (c *VaultClient) getVaultTypePath(key string) (string, string, error) {
 	return "", "", fmt.Errorf("Secrets engine for key ( %s ) does not exist.", key)
 }
 
-func (c *VaultClient) get(key string) ([]byte, int, error) {
+func (c *vaultClient) get(key string) ([]byte, int, error) {
 	vaultType, mountPath, err := c.getVaultTypePath(key)
 	key = strings.TrimPrefix(key, mountPath+"/")
 	if err != nil {
@@ -108,8 +112,8 @@ func (c *VaultClient) get(key string) ([]byte, int, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-		if c.watchConfig != nil {
-			c.versions[mountPath +"/" + key] = version
+		if c.watchConfig != nil && c.watchConfig.VersionPeriod != 0 {
+			c.versions[mountPath+"/"+key] = version
 		}
 		return resp, version, nil
 	case "database":
@@ -118,14 +122,14 @@ func (c *VaultClient) get(key string) ([]byte, int, error) {
 			return nil, 0, err
 		}
 		if c.watchConfig != nil {
-			c.leases[mountPath + "/" + key] = leaseTime
+			c.leases[mountPath+"/"+key] = leaseTime
 		}
 		return resp, leaseTime, nil
 	}
 	return nil, 0, fmt.Errorf("Vault type ( %s ) is not supported.", vaultType)
 }
 
-func (c *VaultClient) Get(key string) ([]byte, error) {
+func (c *vaultClient) Get(key string) ([]byte, error) {
 	bts, _, err := c.get(key)
 	return bts, err
 }
@@ -163,13 +167,15 @@ func (h *watchableHeap) Pop() any {
 	return val
 }
 
-func (v *Viper) watchVault(c *VaultClient) {
+func (v *Viper) watchVault(c *vaultClient) {
 	h := watchableHeap{}
 	for path, leaseTime := range c.leases {
 		heap.Push(&h, Watchable{path: path, nextGet: time.Now().Add(time.Duration(leaseTime) * time.Second)})
 	}
-	for path, _ := range c.versions {
-		heap.Push(&h, Watchable{path: path, nextGet: time.Now().Add(c.watchConfig.VersionPeriod)})
+	if c.watchConfig.VersionPeriod != 0 {
+		for path, _ := range c.versions {
+			heap.Push(&h, Watchable{path: path, nextGet: time.Now().Add(c.watchConfig.VersionPeriod)})
+		}
 	}
 	if len(h) == 0 {
 		v.logger.Error("No watchable paths found for vault watching.")
@@ -186,10 +192,9 @@ func (v *Viper) watchVault(c *VaultClient) {
 				continue
 			}
 			event := heap.Pop(&h).(Watchable)
-			eventVaultType := c.vaults[strings.Split(event.path, "/")[0] + "/"]
+			eventVaultType := c.vaults[strings.Split(event.path, "/")[0]+"/"]
 			time.Sleep(time.Until(event.nextGet))
-			println("starting event")
-			if isVersionable(eventVaultType) {
+			if c.watchConfig.VersionPeriod != 0 && isVersionable(eventVaultType) {
 				oldVersion := c.versions[event.path]
 				data, version, err := c.get(event.path)
 				if err != nil {
@@ -216,9 +221,11 @@ func (v *Viper) watchVault(c *VaultClient) {
 	wg.Wait()
 }
 
-
+// AddVault adds a vault to the viper.
+// Client should be authorized with token set.
+// WatchConfig shoul be nil if you don't have dynamic secrets
 func (v *Viper) AddVault(client *vault.Client, watchConfig *VaultWatchConfig, paths ...string) error {
-	c := &VaultClient{client: client, watchConfig: nil}
+	c := &vaultClient{client: client, watchConfig: nil}
 
 	err := c.ConfigureVault()
 
@@ -226,11 +233,12 @@ func (v *Viper) AddVault(client *vault.Client, watchConfig *VaultWatchConfig, pa
 		return err
 	}
 
-	
 	if watchConfig != nil {
 		c.watchConfig = watchConfig
 		c.leases = make(map[string]int)
-		c.versions = make(map[string]int)
+		if watchConfig.VersionPeriod != 0 {
+			c.versions = make(map[string]int)
+		}
 	}
 
 	for _, path := range paths {
